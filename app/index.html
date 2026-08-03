@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Free-Kick Success Map</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="page">
+    <header class="masthead">
+      <h1 class="masthead__title">Free-Kick Success Map</h1>
+      <p class="masthead__sub">
+        Click anywhere on the attacking half to inspect a free-kick spot. Each click reads out the
+        distance and angle to goal, then opens a tile for the scoring stats from that area.
+      </p>
+    </header>
+
+    <section class="stage">
+      <svg id="pitch" viewBox="0 0 92 72" preserveAspectRatio="xMidYMid meet"
+           role="img" aria-label="Attacking half of a soccer pitch. Click to inspect a spot."></svg>
+
+      <div class="tile" id="tile" hidden role="dialog" aria-label="Free-kick spot statistics">
+        <button class="tile__close" type="button" aria-label="Close">&times;</button>
+        <span class="tile__kicker">Free-kick spot</span>
+        <span class="tile__coord" id="tileCoord">pitch x, y</span>
+
+        <div class="tile__geo">
+          <div class="stat">
+            <span class="stat__label">Distance</span>
+            <span class="stat__value" id="statDist">--</span>
+          </div>
+          <div class="stat">
+            <span class="stat__label">Angle</span>
+            <span class="stat__value" id="statAngle">--</span>
+          </div>
+        </div>
+
+        <div class="tile__divider">From this area</div>
+
+        <div class="tile__data">
+          <div class="stat stat--big">
+            <span class="stat__label">Success rate</span>
+            <span class="stat__value is-empty" id="statRate">--</span>
+          </div>
+          <div class="stat">
+            <span class="stat__label">Shots</span>
+            <span class="stat__value is-empty" id="statShots">--</span>
+          </div>
+          <div class="stat">
+            <span class="stat__label">Goals</span>
+            <span class="stat__value is-empty" id="statGoals">--</span>
+          </div>
+          <div class="stat stat--wide">
+            <span class="stat__label">Nearest scorer</span>
+            <span class="stat__value is-empty" id="statScorer">--</span>
+          </div>
+        </div>
+
+        <p class="tile__note" id="tileNote">
+          Data slots ready. Run src/build_field_data.py to fill them from freekicks_all.csv.
+        </p>
+      </div>
+    </section>
+
+    <div class="legend">
+      <span><b>Distance / angle</b> are computed live from where you click.</span>
+      <span><b>Success rate, shots, nearest scorer</b> load from the dataset once wired.</span>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
