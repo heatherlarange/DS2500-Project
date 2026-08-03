@@ -1,3 +1,79 @@
-# DS2500-Project
+# DS2500 Project - Free-Kick Success Map
 
-# 
+An interactive map of the attacking half of a soccer pitch. Click any spot and it
+reports the distance and angle to goal, then opens a tile with the free-kick
+scoring stats from that area: the success rate, the shot and goal counts, and the
+nearest player who scored a free kick from there.
+
+The tool is built on a combined free-kick dataset (StatsBomb, HuggingFace xG,
+and Football Events) covering major men's leagues and international tournaments.
+
+## The main product
+
+`app/` is an interactive web page (plain HTML, CSS, and SVG - no build step):
+
+- **`index.html`** - the page: header, the pitch, and the stat tile.
+- **`app.js`** - draws the half-pitch, handles clicks, computes distance/angle
+  live, and fills the tile from the dataset.
+- **`styles.css`** - dark sports-analytics theme.
+- **`field_stats.json`** - the data the tile reads. Starts empty; generated from
+  the CSV by the script below.
+
+## How the pieces fit together
+
+```
+data/freekicks_all.csv  ->  src/build_field_data.py  ->  app/field_stats.json  ->  app/ (the map)
+```
+
+1. `data/freekicks_all.csv` holds every free-kick shot in one shared schema.
+2. `src/build_field_data.py` bins the pitch into a grid and computes, per cell,
+   the shot/goal counts, the success rate, and the nearest scorer.
+3. The web app loads that JSON and shows the numbers when you click a spot.
+
+## Run it locally
+
+Because the app reads a JSON file, open it through a local server (not by
+double-clicking, which some browsers block from reading local files):
+
+```bash
+python -m http.server 8000 --directory app
+```
+
+Then visit `http://localhost:8000`. The pitch is fully interactive right away;
+the distance and angle read out on every click.
+
+## Light up the data tile
+
+The stat slots (success rate, shots, goals, nearest scorer) start empty on
+purpose. To fill them from the dataset:
+
+```bash
+python src/build_field_data.py
+```
+
+That reads `data/freekicks_all.csv` and writes `app/field_stats.json`. Reload the
+page and clicking a spot now shows the real numbers. (Verified: this produces 159
+grid cells from ~18,000 located free-kick shots.)
+
+## Repository layout
+
+```
+DS2500-Project/
+├── app/                    # the interactive map (the main product)
+│   ├── index.html
+│   ├── app.js
+│   ├── styles.css
+│   └── field_stats.json    # generated data (starts empty)
+├── data/
+│   ├── freekicks_all.csv   # combined free-kick dataset (one row per shot)
+│   └── README.md           # data schema and sources
+└── src/
+    ├── build_field_data.py # turns the CSV into field_stats.json
+    └── main.py
+```
+
+## Publishing (optional)
+
+To put the map online, enable GitHub Pages and point it at the `app/` folder
+(Settings -> Pages -> Deploy from branch -> `/app`). Generate `field_stats.json`
+first so the live version has data.

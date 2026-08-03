@@ -1,0 +1,12 @@
+{
+  "meta": {
+    "generated": null,
+    "note": "Empty stub. Run src/build_field_data.py to fill 'cells' from data/freekicks_all.csv."
+  },
+  "bin_size": 5,
+  "x_min": 60,
+  "x_max": 120,
+  "y_min": 0,
+  "y_max": 80,
+  "cells": {}
+}
