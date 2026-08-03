@@ -45,51 +45,86 @@ function rectPitch(g, xa, ya, xb, yb, cls) {
   const [sx1, sy1] = toSvg(xb, ya);   // xb is the larger length (closer to goal / top)
   const w = Math.abs(yb - ya);
   const h = Math.abs(xb - xa);
-  g.appendChild(el("rect", { x: sx1, y: sy1, width: w, height: h, class: cls, rx: 0.2 }));
+  g.appendChild(el("rect", { x: sx1, y: sy1, width: w, height: h, class: cls }));
 }
 
 // --- draw the half-pitch ---
+// Real dimensions (yards): 18-yard box 44 wide, 6-yard box 20 wide, penalty
+// spot 12 from goal, centre circle r10, goal 8 wide, corner arcs r1.
 function drawPitch() {
+  // defs: goal netting + turf shading
+  const defs = el("defs", {});
+  const net = el("pattern", {
+    id: "netmesh", width: 0.7, height: 0.7, patternUnits: "userSpaceOnUse"
+  });
+  net.appendChild(el("path", {
+    d: "M0 0 L0.7 0.7 M0.7 0 L0 0.7",
+    stroke: "rgba(255,255,255,0.30)", "stroke-width": 0.07, fill: "none"
+  }));
+  defs.appendChild(net);
+
+  const shade = el("radialGradient", { id: "turfshade", cx: "50%", cy: "18%", r: "95%" });
+  shade.appendChild(el("stop", { offset: "0%", "stop-color": "#ffffff", "stop-opacity": 0.09 }));
+  shade.appendChild(el("stop", { offset: "62%", "stop-color": "#000000", "stop-opacity": 0 }));
+  shade.appendChild(el("stop", { offset: "100%", "stop-color": "#000000", "stop-opacity": 0.24 }));
+  defs.appendChild(shade);
+  svg.appendChild(defs);
+
   const g = el("g", {});
-  // grass base + mowing stripes
   const [gx, gy] = toSvg(120, 0);
-  g.appendChild(el("rect", { x: gx, y: gy, width: 80, height: 60, class: "grass", rx: 1 }));
-  for (let i = 0; i < 6; i++) {
-    const [sx, sy] = toSvg(120 - i * 10, 0);
+
+  // turf: 5-yard mowing bands, low contrast so the white lines stay dominant
+  g.appendChild(el("rect", { x: gx, y: gy, width: 80, height: 60, class: "grass" }));
+  for (let i = 0; i < 12; i++) {
+    const [sx, sy] = toSvg(120 - i * 5, 0);
     g.appendChild(el("rect", {
-      x: sx, y: sy, width: 80, height: 10,
+      x: sx, y: sy, width: 80, height: 5,
       class: i % 2 === 0 ? "stripe-a" : "stripe-b"
     }));
   }
-  // outer boundary of the shown half
+  g.appendChild(el("rect", { x: gx, y: gy, width: 80, height: 60, fill: "url(#turfshade)" }));
+
+  // goal: netting behind the line, then posts and crossbar on top
+  {
+    const [sx, sy] = toSvg(120, 36);          // left post, on the goal line
+    g.appendChild(el("rect", { x: sx, y: sy - 2.2, width: 8, height: 2.2, fill: "url(#netmesh)" }));
+    g.appendChild(el("rect", { x: sx, y: sy - 2.2, width: 8, height: 2.2, class: "goalframe" }));
+  }
+
+  // outer boundary (goal line at top, halfway line at bottom, two touchlines)
   rectPitch(g, 60, 0, 120, 80, "pline");
-  // halfway line is the bottom edge; center-circle arc bulging into the half
+
+  // corner arcs, 1 yard, at both goal-line corners
+  g.appendChild(el("path", { d: "M 6 7 A 1 1 0 0 0 7 6", class: "pline" }));
+  g.appendChild(el("path", { d: "M 85 6 A 1 1 0 0 0 86 7", class: "pline" }));
+
+  // centre circle: semicircle bulging into this half, plus the centre spot
   {
     const [ax, ay] = toSvg(60, 30);
     const [bx, by] = toSvg(60, 50);
     g.appendChild(el("path", { d: `M ${ax} ${ay} A 10 10 0 0 1 ${bx} ${by}`, class: "pline" }));
     const [cx, cy] = toSvg(60, 40);
-    g.appendChild(el("circle", { cx, cy, r: 0.5, class: "pdot" }));
+    g.appendChild(el("circle", { cx, cy, r: 0.55, class: "pdot" }));
   }
-  // penalty box (102..120 length, 18..62 width) and 6-yard box
+
+  // penalty box and 6-yard box
   rectPitch(g, 102, 18, 120, 62, "pline");
   rectPitch(g, 114, 30, 120, 50, "pline");
-  // penalty spot
-  {
-    const [sx, sy] = toSvg(108, 40);
-    g.appendChild(el("circle", { cx: sx, cy: sy, r: 0.5, class: "pdot" }));
-  }
-  // penalty arc (D) outside the box
+
+  // penalty arc: centred on the penalty spot, bulging AWAY from goal.
+  // sweep-flag must be 0 here; 1 curves it back into the box.
   {
     const [ax, ay] = toSvg(102, 32);
     const [bx, by] = toSvg(102, 48);
-    g.appendChild(el("path", { d: `M ${ax} ${ay} A 10 10 0 0 1 ${bx} ${by}`, class: "pline" }));
+    g.appendChild(el("path", { d: `M ${ax} ${ay} A 10 10 0 0 0 ${bx} ${by}`, class: "pline" }));
   }
-  // goal frame on the goal line
+
+  // penalty spot
   {
-    const [sx, sy] = toSvg(120, 36);
-    g.appendChild(el("rect", { x: sx, y: sy - 1.6, width: 8, height: 1.6, class: "goal" }));
+    const [sx, sy] = toSvg(108, 40);
+    g.appendChild(el("circle", { cx: sx, cy: sy, r: 0.55, class: "pdot" }));
   }
+
   svg.appendChild(g);
 }
 
