@@ -8,6 +8,20 @@ nearest player who scored a free kick from there.
 The tool is built on a combined free-kick dataset (StatsBomb, HuggingFace xG,
 and Football Events) covering major men's leagues and international tournaments.
 
+## Quickest way to open it: one file, no setup
+
+**`freekick_map.html`** is the whole tool in a single file - the pitch, the code,
+and the data are all inside it. Download it and double-click. It opens in any
+browser with no server, no Python, and no install.
+
+To get it from GitHub: open
+[`freekick_map.html`](freekick_map.html), click the **Download raw file** button
+(top right), then double-click the downloaded file. Or grab the whole repo with
+**Code -> Download ZIP**.
+
+Everything below describes the multi-file version in `app/`, which is the same
+tool split into separate files for development.
+
 ## The main product
 
 `app/` is an interactive web page (plain HTML, CSS, and SVG - no build step):
@@ -51,15 +65,16 @@ purpose. To fill them from the dataset:
 python src/build_field_data.py
 ```
 
-That reads `data/freekicks_all.csv` and writes `app/field_stats.json`. Reload the
-page and clicking a spot now shows the real numbers. (Verified: this produces 159
-grid cells from ~18,000 located free-kick shots.)
+That reads `data/freekicks_all.csv`, writes `app/field_stats.json`, and bakes the
+same data into `freekick_map.html` so the one-file version stays self-contained.
+It produces 159 grid cells from ~18,000 located free-kick shots.
 
 ## Repository layout
 
 ```
 DS2500-Project/
-├── app/                    # the interactive map (the main product)
+├── freekick_map.html       # THE ONE-FILE VERSION - double-click to run
+├── app/                    # same tool, split into files for development
 │   ├── index.html
 │   ├── app.js
 │   ├── styles.css

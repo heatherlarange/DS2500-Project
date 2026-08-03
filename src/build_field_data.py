@@ -24,6 +24,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 CSV = os.path.join(ROOT, "data", "freekicks_all.csv")
 OUT = os.path.join(ROOT, "app", "field_stats.json")
+STANDALONE = os.path.join(ROOT, "freekick_map.html")   # single double-clickable file
 
 BIN = 5            # cell size in yards
 X_MIN, X_MAX = 60, 120
@@ -89,6 +90,43 @@ def main():
     with open(OUT, "w", encoding="utf-8") as f:
         json.dump(payload, f)
     print(f"Wrote {OUT}: {len(cells)} cells from {len(df)} located free-kick shots.")
+
+    inject_standalone(payload)
+
+
+def inject_standalone(payload):
+    """Bake the data into freekick_map.html so it works by double-clicking.
+
+    A browser opening a file:// page is not allowed to fetch a separate JSON
+    file, so the single-file version carries its data inline. We swap the line
+    tagged with the FIELD_DATA marker.
+    """
+    if not os.path.exists(STANDALONE):
+        return
+    slim = {
+        "bin_size": payload["bin_size"],
+        "x_min": payload["x_min"], "x_max": payload["x_max"],
+        "y_min": payload["y_min"], "y_max": payload["y_max"],
+        "cells": payload["cells"],
+    }
+    # ensure_ascii=True keeps accented player names as \uXXXX escapes, so the
+    # file survives being emailed, zipped, or re-saved on any machine.
+    new_line = ("const FIELD_DATA = "
+                + json.dumps(slim, ensure_ascii=True)
+                + "; /*FIELD_DATA*/")
+
+    with open(STANDALONE, "r", encoding="utf-8") as f:
+        lines = f.readlines()
+    for i, line in enumerate(lines):
+        if "/*FIELD_DATA*/" in line:
+            lines[i] = new_line + "\n"
+            break
+    else:
+        print("  (marker not found in freekick_map.html, skipped)")
+        return
+    with open(STANDALONE, "w", encoding="utf-8") as f:
+        f.writelines(lines)
+    print(f"Wrote {STANDALONE}: data baked in, open it by double-clicking.")
 
 
 if __name__ == "__main__":
