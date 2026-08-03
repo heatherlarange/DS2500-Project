@@ -72,8 +72,18 @@ DS2500-Project/
     └── main.py
 ```
 
-## Publishing (optional)
+## Publishing (so teammates can open it)
 
-To put the map online, enable GitHub Pages and point it at the `app/` folder
-(Settings -> Pages -> Deploy from branch -> `/app`). Generate `field_stats.json`
-first so the live version has data.
+The map is hosted with GitHub Pages. A repo owner or admin enables it once:
+
+1. Repo **Settings** -> **Pages**
+2. **Source**: Deploy from a branch
+3. **Branch**: `main`, **Folder**: `/ (root)`, then **Save**
+
+A root redirect (`index.html`) forwards visitors to the map, so the public link is:
+
+**https://heatherlarange.github.io/DS2500-Project/**
+
+Anyone can open that in a browser - no install. The pitch is interactive
+immediately; generate and commit `app/field_stats.json`
+(`python src/build_field_data.py`) so the live tiles show data.
