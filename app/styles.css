@@ -9,9 +9,9 @@
   --text-muted:   #8ea297;
   --accent:       #f5a524;   /* locked accent */
   --accent-soft:  rgba(245, 165, 36, 0.16);
-  --grass-a:      #1d7a45;
-  --grass-b:      #196b3d;
-  --pitch-line:   rgba(255, 255, 255, 0.82);
+  --grass-a:      #1f7a48;
+  --grass-b:      #1b7042;
+  --pitch-line:   rgba(255, 255, 255, 0.94);
   --radius-card:  14px;
   --radius-chip:  10px;
   --mono: ui-monospace, "SF Mono", "SFMono-Regular", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
@@ -69,12 +69,12 @@ html, body {
 }
 
 /* Pitch elements (styled via CSS so var() works; SVG attributes can't take var()) */
-.grass    { fill: var(--grass-b); }
-.stripe-a { fill: var(--grass-a); }
-.stripe-b { fill: var(--grass-b); }
-.pline    { fill: none; stroke: var(--pitch-line); stroke-width: 0.3; }
-.pdot     { fill: var(--pitch-line); }
-.goal     { fill: none; stroke: var(--pitch-line); stroke-width: 0.4; }
+.grass     { fill: var(--grass-b); }
+.stripe-a  { fill: var(--grass-a); }
+.stripe-b  { fill: var(--grass-b); }
+.pline     { fill: none; stroke: var(--pitch-line); stroke-width: 0.42; stroke-linejoin: miter; }
+.pdot      { fill: var(--pitch-line); }
+.goalframe { fill: none; stroke: #ffffff; stroke-width: 0.55; }
 
 /* Marker dropped at the click point */
 .marker-dot { fill: var(--accent); stroke: #0e1411; stroke-width: 0.25; }

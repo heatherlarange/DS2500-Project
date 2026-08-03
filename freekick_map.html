@@ -13,7 +13,7 @@
 :root{
   --bg:#0e1411;--bg-panel:#141d18;--line:rgba(255,255,255,.10);--text:#e9efe9;
   --text-muted:#8ea297;--accent:#f5a524;--accent-soft:rgba(245,165,36,.16);
-  --grass-a:#1d7a45;--grass-b:#196b3d;--pitch-line:rgba(255,255,255,.82);
+  --grass-a:#1f7a48;--grass-b:#1b7042;--pitch-line:rgba(255,255,255,.94);
   --radius-card:14px;--radius-chip:10px;
   --mono:ui-monospace,"SF Mono","Cascadia Mono","Roboto Mono",Menlo,Consolas,monospace;
   --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
@@ -27,8 +27,8 @@ html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans
 .stage{position:relative;background:var(--bg-panel);border:1px solid var(--line);border-radius:var(--radius-card);padding:14px;box-shadow:0 18px 50px rgba(0,0,0,.35)}
 #pitch{display:block;width:100%;height:auto;cursor:crosshair;border-radius:8px;touch-action:manipulation}
 .grass{fill:var(--grass-b)}.stripe-a{fill:var(--grass-a)}.stripe-b{fill:var(--grass-b)}
-.pline{fill:none;stroke:var(--pitch-line);stroke-width:.3}.pdot{fill:var(--pitch-line)}
-.goal{fill:none;stroke:var(--pitch-line);stroke-width:.4}
+.pline{fill:none;stroke:var(--pitch-line);stroke-width:.42;stroke-linejoin:miter}.pdot{fill:var(--pitch-line)}
+.goalframe{fill:none;stroke:#fff;stroke-width:.55}
 .marker-dot{fill:var(--accent);stroke:#0e1411;stroke-width:.25}
 .marker-ring{fill:none;stroke:var(--accent);stroke-width:.35;transform-box:fill-box;transform-origin:center}
 @media (prefers-reduced-motion:no-preference){
@@ -103,19 +103,42 @@ function toSvg(px,py){return [M+py, M+(120-px)];}
 function toPitch(sx,sy){return [clamp(120-(sy-M),60,120), clamp(sx-M,0,80)];}
 function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v));}
 function el(name,attrs){const n=document.createElementNS(SVGNS,name);for(const k in attrs)n.setAttribute(k,attrs[k]);return n;}
-function rectPitch(g,xa,ya,xb,yb,cls){const [sx1,sy1]=toSvg(xb,ya);const w=Math.abs(yb-ya),h=Math.abs(xb-xa);g.appendChild(el("rect",{x:sx1,y:sy1,width:w,height:h,class:cls,rx:.2}));}
+function rectPitch(g,xa,ya,xb,yb,cls){const [sx1,sy1]=toSvg(xb,ya);const w=Math.abs(yb-ya),h=Math.abs(xb-xa);g.appendChild(el("rect",{x:sx1,y:sy1,width:w,height:h,class:cls}));}
+// Real dimensions (yards): 18-yard box 44 wide, 6-yard box 20 wide, penalty
+// spot 12 from goal, centre circle r10, goal 8 wide, corner arcs r1.
 function drawPitch(){
+  const defs=el("defs",{});
+  const net=el("pattern",{id:"netmesh",width:.7,height:.7,patternUnits:"userSpaceOnUse"});
+  net.appendChild(el("path",{d:"M0 0 L0.7 0.7 M0.7 0 L0 0.7",stroke:"rgba(255,255,255,0.30)","stroke-width":.07,fill:"none"}));
+  defs.appendChild(net);
+  const shade=el("radialGradient",{id:"turfshade",cx:"50%",cy:"18%",r:"95%"});
+  shade.appendChild(el("stop",{offset:"0%","stop-color":"#ffffff","stop-opacity":.09}));
+  shade.appendChild(el("stop",{offset:"62%","stop-color":"#000000","stop-opacity":0}));
+  shade.appendChild(el("stop",{offset:"100%","stop-color":"#000000","stop-opacity":.24}));
+  defs.appendChild(shade);
+  svg.appendChild(defs);
+
   const g=el("g",{});
   const [gx,gy]=toSvg(120,0);
-  g.appendChild(el("rect",{x:gx,y:gy,width:80,height:60,class:"grass",rx:1}));
-  for(let i=0;i<6;i++){const [sx,sy]=toSvg(120-i*10,0);g.appendChild(el("rect",{x:sx,y:sy,width:80,height:10,class:i%2===0?"stripe-a":"stripe-b"}));}
+  // turf: 5-yard mowing bands, low contrast so the white lines stay dominant
+  g.appendChild(el("rect",{x:gx,y:gy,width:80,height:60,class:"grass"}));
+  for(let i=0;i<12;i++){const [sx,sy]=toSvg(120-i*5,0);g.appendChild(el("rect",{x:sx,y:sy,width:80,height:5,class:i%2===0?"stripe-a":"stripe-b"}));}
+  g.appendChild(el("rect",{x:gx,y:gy,width:80,height:60,fill:"url(#turfshade)"}));
+  // goal: netting behind the line, then the frame
+  {const [sx,sy]=toSvg(120,36);
+   g.appendChild(el("rect",{x:sx,y:sy-2.2,width:8,height:2.2,fill:"url(#netmesh)"}));
+   g.appendChild(el("rect",{x:sx,y:sy-2.2,width:8,height:2.2,class:"goalframe"}));}
+  // boundary + 1-yard corner arcs
   rectPitch(g,60,0,120,80,"pline");
-  {const [ax,ay]=toSvg(60,30),[bx,by]=toSvg(60,50);g.appendChild(el("path",{d:`M ${ax} ${ay} A 10 10 0 0 1 ${bx} ${by}`,class:"pline"}));const [cx,cy]=toSvg(60,40);g.appendChild(el("circle",{cx,cy,r:.5,class:"pdot"}));}
+  g.appendChild(el("path",{d:"M 6 7 A 1 1 0 0 0 7 6",class:"pline"}));
+  g.appendChild(el("path",{d:"M 85 6 A 1 1 0 0 0 86 7",class:"pline"}));
+  // centre circle bulging into this half
+  {const [ax,ay]=toSvg(60,30),[bx,by]=toSvg(60,50);g.appendChild(el("path",{d:`M ${ax} ${ay} A 10 10 0 0 1 ${bx} ${by}`,class:"pline"}));const [cx,cy]=toSvg(60,40);g.appendChild(el("circle",{cx,cy,r:.55,class:"pdot"}));}
   rectPitch(g,102,18,120,62,"pline");
   rectPitch(g,114,30,120,50,"pline");
-  {const [sx,sy]=toSvg(108,40);g.appendChild(el("circle",{cx:sx,cy:sy,r:.5,class:"pdot"}));}
-  {const [ax,ay]=toSvg(102,32),[bx,by]=toSvg(102,48);g.appendChild(el("path",{d:`M ${ax} ${ay} A 10 10 0 0 1 ${bx} ${by}`,class:"pline"}));}
-  {const [sx,sy]=toSvg(120,36);g.appendChild(el("rect",{x:sx,y:sy-1.6,width:8,height:1.6,class:"goal"}));}
+  // penalty arc: sweep-flag must be 0 so the D bulges away from goal
+  {const [ax,ay]=toSvg(102,32),[bx,by]=toSvg(102,48);g.appendChild(el("path",{d:`M ${ax} ${ay} A 10 10 0 0 0 ${bx} ${by}`,class:"pline"}));}
+  {const [sx,sy]=toSvg(108,40);g.appendChild(el("circle",{cx:sx,cy:sy,r:.55,class:"pdot"}));}
   svg.appendChild(g);
 }
 function distanceM(px,py){return Math.hypot(GOAL.x-px,GOAL.y-py)*YARD_TO_M;}
