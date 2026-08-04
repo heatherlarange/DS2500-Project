@@ -1,3 +1,7 @@
 __pycache__/
 *.pyc
 .DS_Store
+
+# Old combined dataset, replaced by the direct/indirect files in data/.
+# Kept local only; build_field_data.py no longer reads it.
+data/freekicks_all.csv
