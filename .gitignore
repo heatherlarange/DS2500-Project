@@ -1,3 +1,7 @@
 __pycache__/
 *.pyc
 .DS_Store
+
+# Combined source dataset: kept local, too large to track.
+# src/build_field_data.py reads it to regenerate app/field_stats.json.
+data/freekicks_all.csv
