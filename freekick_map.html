@@ -172,6 +172,39 @@ function showTile(px,py,clientX,clientY){
 function handleClick(e){const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const p=pt.matrixTransform(svg.getScreenCTM().inverse());const [px,py]=toPitch(p.x,p.y);placeMarker(px,py);showTile(px,py,e.clientX,e.clientY);}
 svg.addEventListener("click",handleClick);
 document.querySelector(".tile__close").addEventListener("click",()=>{tile.hidden=true;markerLayer.replaceChildren();});
+
+// add heatmap
+(function setupHeatmapOverlay() {
+  const pitchSvg = document.getElementById("pitch");
+  const wrapper = document.createElement("div");
+  wrapper.style.position = "relative";
+
+  pitchSvg.parentNode.insertBefore(wrapper, pitchSvg);
+  wrapper.appendChild(pitchSvg);
+
+  const heatmapImg = document.createElement("img");
+  heatmapImg.id = "heatmapImg";
+  heatmapImg.src = "heatmap_overlay.png";
+  Object.assign(heatmapImg.style, {
+    position: "absolute",
+    pointerEvents: "none",
+    display: "none",
+    left: "6.5217%",
+    top: "8.3333%",
+    width: "86.9565%",
+    height: "83.3333%"
+  });
+  wrapper.appendChild(heatmapImg);
+
+  const label = document.createElement("label");
+  label.style.cssText = "color:var(--text-muted); font-size:.9rem; display:block; margin-bottom:10px;";
+  label.innerHTML = `<input type="checkbox" id="heatmapToggle"> Show goal probability heatmap`;
+  document.querySelector(".stage").parentNode.insertBefore(label, document.querySelector(".stage"));
+
+  document.getElementById("heatmapToggle").addEventListener("change", (e) => {
+    heatmapImg.style.display = e.target.checked ? "block" : "none";
+  });
+})();
 drawPitch();
 </script>
 </body>
