@@ -36,10 +36,11 @@ tool split into separate files for development.
 ## How the pieces fit together
 
 ```
-data/freekicks_all.csv  ->  src/build_field_data.py  ->  app/field_stats.json  ->  app/ (the map)
+data/freekicks_direct_only.csv  +  data/freekicks_indirect_only.csv
+        ->  src/build_field_data.py  ->  app/field_stats.json  ->  app/ (the map)
 ```
 
-1. `data/freekicks_all.csv` holds every free-kick shot in one shared schema.
+1. The two CSVs in `data/` hold every free-kick shot, split by type, in one shared schema.
 2. `src/build_field_data.py` bins the pitch into a grid and computes, per cell,
    the shot/goal counts, the success rate, and the nearest scorer.
 3. The web app loads that JSON and shows the numbers when you click a spot.
@@ -65,9 +66,11 @@ purpose. To fill them from the dataset:
 python src/build_field_data.py
 ```
 
-That reads `data/freekicks_all.csv`, writes `app/field_stats.json`, and bakes the
+That reads both CSVs in `data/`, writes `app/field_stats.json`, and bakes the
 same data into `freekick_map.html` so the one-file version stays self-contained.
-It produces 159 grid cells from ~18,000 located free-kick shots.
+It produces 156 grid cells from 15,917 located free-kick shots. Every cell also
+carries a direct/indirect breakdown, so the heatmap can shade the two types
+separately.
 
 ## Repository layout
 
@@ -80,7 +83,8 @@ DS2500-Project/
 │   ├── styles.css
 │   └── field_stats.json    # generated data (starts empty)
 ├── data/
-│   ├── freekicks_all.csv   # combined free-kick dataset (one row per shot)
+│   ├── freekicks_direct_only.csv     # 3,846 direct free kicks
+│   ├── freekicks_indirect_only.csv   # 12,092 indirect free kicks
 │   └── README.md           # data schema and sources
 └── src/
     ├── build_field_data.py # turns the CSV into field_stats.json

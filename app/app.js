@@ -195,7 +195,7 @@ function showTile(px, py, clientX, clientY) {
   } else {
     ["statRate", "statShots", "statGoals", "statScorer"].forEach(id => setValue(id, "--", true));
     document.getElementById("tileNote").textContent =
-      "Data slots ready. Run src/build_field_data.py to fill them from freekicks_all.csv.";
+      "Data slots ready. Run src/build_field_data.py to fill them from the free-kick datasets.";
   }
 
   // position the tile near the click, clamped inside the stage
