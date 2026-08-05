@@ -2,36 +2,30 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 import pandas as pd
 import numpy as np
-from sklearn.neighbors import KNeighborsClassifier
+from scipy.stats import gaussian_kde
 
 df = pd.read_csv("data/freekicks_indirect_only.csv")
 
-X = df[["location_x", "location_y"]].values
+goals = df[df["is_goal"] == 1]
 
-y = df["is_goal"].values
+x_goals = goals["location_x"].values
+y_goals = goals["location_y"].values
 
-k = 20
-knn = KNeighborsClassifier(
-    n_neighbors=k,
-    weights="distance"
-)
+kde = gaussian_kde(np.vstack([x_goals, y_goals]), bw_method=0.15)
 
-knn.fit(X,y)
+x_grid = np.linspace(60, 120, 300)
+y_grid = np.linspace(0, 80, 300)
+xx, yy = np.meshgrid(x_grid,y_grid)
+gridpoints = np.vstack([xx.ravel(), yy.ravel()])
 
-x = np.linspace(60, 120, 300)
-y = np.linspace(0, 80, 300)
-
-xx, yy = np.meshgrid(x,y)
-
-gridpoints = np.c_[xx.ravel(), yy.ravel()]
-
-prob = knn.predict_proba(gridpoints)[:, 1]
-prob = prob.reshape(xx.shape)
+density = kde(gridpoints)
+density = density.reshape(xx.shape)
+density_scaled = density * len(x_goals)
 
 fig, ax = plt.subplots(figsize=(10,7))
 
 heatmap = ax.imshow(
-    prob.T,
+    density_scaled.T,
     extent=[0,80,60,120],
     origin="lower",
     cmap=LinearSegmentedColormap.from_list(
@@ -39,11 +33,11 @@ heatmap = ax.imshow(
 ),
     alpha=0.85,
     aspect="auto",
-    vmin=0, vmax=max(0.5, prob.max())
+    vmin=0, vmax=max(0.5, density_scaled.max())
 )
 
 cbar = fig.colorbar(heatmap, ax=ax, shrink=0.8)
-cbar.set_label("Predicted Probability of Goal")
+cbar.set_label("Density of Indirect Goals Scored")
 
 line_color = "black"
 line_width = 1.5
@@ -52,7 +46,7 @@ ax.plot([0, 80], [120, 120], color="black", lw=1.5)
 ax.plot([18, 62], [102, 102], color="black", lw=1)            
 ax.plot([18, 18], [102, 120], color="black", lw=1)
 ax.plot([62, 62], [102, 120], color="black", lw=1)
-ax.plot([30, 50], [114, 114], color="black", lw=1)         
+ax.plot([30, 50], [114, 114], color="black", lw=1)            
 ax.plot([30, 30], [114, 120], color="black", lw=1)
 ax.plot([50, 50], [114, 120], color="black", lw=1)
 
@@ -60,10 +54,10 @@ ax.plot(40, 108, marker="o", markersize=3, color=line_color)
 
 ax.set_xlim(0, 80)
 ax.set_ylim(60, 120)
-ax.set_title(f"Indirect Goal Probability Heatmap (KNN, k={k})", fontsize=13)
+ax.set_title(f"Heatmap of Indirect Goal Density", fontsize=13)
 ax.set_xlabel("Location X")
 ax.set_ylabel("Location Y")
 
 plt.tight_layout()
-plt.savefig("knn_goal_heatmap_in.png", dpi=200)
+plt.savefig("density_goal_heatmap_in.png", dpi=200)
 plt.show()
