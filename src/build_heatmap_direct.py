@@ -48,11 +48,11 @@ cbar.set_label("Predicted Probability of Goal")
 line_color = "black"
 line_width = 1.5
 
-ax.plot([0, 80], [120, 120], color="black", lw=1.5)          # goal line (top)
-ax.plot([18, 62], [102, 102], color="black", lw=1)            # 18-yard box top edge
+ax.plot([0, 80], [120, 120], color="black", lw=1.5)          
+ax.plot([18, 62], [102, 102], color="black", lw=1)            
 ax.plot([18, 18], [102, 120], color="black", lw=1)
 ax.plot([62, 62], [102, 120], color="black", lw=1)
-ax.plot([30, 50], [114, 114], color="black", lw=1)            # 6-yard box top edge
+ax.plot([30, 50], [114, 114], color="black", lw=1)            
 ax.plot([30, 30], [114, 120], color="black", lw=1)
 ax.plot([50, 50], [114, 120], color="black", lw=1)
 

@@ -28,7 +28,7 @@ cmap = LinearSegmentedColormap.from_list("goal_prob", ["#1a9850", "#fee08b", "#d
 fig = plt.figure(figsize=(10, 7), dpi=150)
 fig.patch.set_alpha(0.0)                      
 
-line_color = "white"   # use "black" instead if your field background is light
+line_color = "white"   
 line_width = 1.5
 
 ax = plt.Axes(fig, [0, 0, 1, 1])              
