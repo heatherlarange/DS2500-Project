@@ -173,18 +173,23 @@ function handleClick(e){const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clie
 svg.addEventListener("click",handleClick);
 document.querySelector(".tile__close").addEventListener("click",()=>{tile.hidden=true;markerLayer.replaceChildren();});
 
-// add heatmap
-(function setupHeatmapOverlay() {
-  const pitchSvg = document.getElementById("pitch");
-  const wrapper = document.createElement("div");
-  wrapper.style.position = "relative";
+// add heatmaps
 
-  pitchSvg.parentNode.insertBefore(wrapper, pitchSvg);
-  wrapper.appendChild(pitchSvg);
+function addHeatmapToggle({ src, label: labelText, imgId, toggleId }) {
+  const pitchSvg = document.getElementById("pitch");
+  
+  let wrapper = pitchSvg.parentNode;
+  if (!wrapper.classList.contains("pitch-wrapper")) {
+    wrapper = document.createElement("div");
+    wrapper.className = "pitch-wrapper";
+    wrapper.style.position = "relative";
+    pitchSvg.parentNode.insertBefore(wrapper, pitchSvg);
+    wrapper.appendChild(pitchSvg);
+  }
 
   const heatmapImg = document.createElement("img");
-  heatmapImg.id = "heatmapImg";
-  heatmapImg.src = "heatmap_overlay.png";
+  heatmapImg.id = imgId;
+  heatmapImg.src = src;
   Object.assign(heatmapImg.style, {
     position: "absolute",
     pointerEvents: "none",
@@ -198,13 +203,28 @@ document.querySelector(".tile__close").addEventListener("click",()=>{tile.hidden
 
   const label = document.createElement("label");
   label.style.cssText = "color:var(--text-muted); font-size:.9rem; display:block; margin-bottom:10px;";
-  label.innerHTML = `<input type="checkbox" id="heatmapToggle"> Show goal probability heatmap`;
+  label.innerHTML = `<input type="checkbox" id="${toggleId}"> ${labelText}`;
   document.querySelector(".stage").parentNode.insertBefore(label, document.querySelector(".stage"));
 
-  document.getElementById("heatmapToggle").addEventListener("change", (e) => {
+  document.getElementById(toggleId).addEventListener("change", (e) => {
     heatmapImg.style.display = e.target.checked ? "block" : "none";
   });
-})();
+}
+
+addHeatmapToggle({
+  src: "heatmap_overlay.png",
+  label: "Show direct goal probability heatmap",
+  imgId: "heatmapImgDirect",
+  toggleId: "heatmapToggleDirect"
+});
+
+addHeatmapToggle({
+  src: "heatmap_overlay_in.png",
+  label: "Show indirect goal probability heatmap",
+  imgId: "heatmapImgIndirect",
+  toggleId: "heatmapToggleIndirect"
+});
+
 drawPitch();
 </script>
 </body>
