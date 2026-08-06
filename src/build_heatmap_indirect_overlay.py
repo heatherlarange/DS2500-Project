@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 from scipy.stats import gaussian_kde
 
-df = pd.read_csv("data/freekicks_indirect_only.csv")
+df = pd.read_csv("data/freekicks_indirect_fkspot.csv")
 
 goals = df[df["is_goal"] == 1]
 
